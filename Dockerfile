@@ -8,10 +8,12 @@ RUN useradd -r -u 1001 moments && mkdir -p /app/uploads /app/logs && chown -R mo
 USER moments
 
 COPY target/moments4j-*.jar app.jar
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # uploads/logs are meant to be mounted
 VOLUME ["/app/uploads", "/app/logs"]
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["docker-entrypoint.sh"]
