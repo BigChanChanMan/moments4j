@@ -4,7 +4,7 @@
 
 A Java port of the Flask photo-sharing app [Moments](https://github.com/greyli/moments), 1:1 in features, routes, templates and package layout.
 
-![demo](https://github.com/greyli/moments/raw/master/demo.png)
+![demo](https://github.com/greyli/moments/raw/main/demo.png)
 
 ## 技术栈对照 / Stack mapping
 
