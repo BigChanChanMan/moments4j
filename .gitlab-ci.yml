@@ -1,0 +1,192 @@
+# moments4j CI pipeline
+#
+# Stages:
+#   build    — dependency caching + compile (every push/MR)
+#   test     — unit/integration tests (every push/MR)
+#   quality  — code style + security scan (every push/MR, non-blocking reports)
+#   package  — build the boot jar (main only)
+#   e2e      — Selenium UI tests (nightly / manual, needs Chrome)
+#   docker   — container image build (main/tags)
+#   release  — attach the jar/image to a GitLab Release (tags)
+#
+# Layering follows the test pyramid: cheap layers run on every push,
+# the browser layer only nightly/manual/release.
+
+stages:
+  - build
+  - test
+  - quality
+  - package
+  - e2e
+  - docker
+  - release
+
+variables:
+  # CI/CD variables (Settings > CI/CD > Variables), all optional:
+  #   CACHE_FALLBACK_KEY   — custom cache key suffix
+  #   DOCKER_REGISTRY_USER / DOCKER_REGISTRY_TOKEN — image push credentials
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.showDateTime=true"
+  # fail fast on OOM, keep default GC ergonomics small for runners
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+  # the app's own uploads/ and logs/ — keep them per-job, never cached
+  MOMENTS_UPLOAD_PATH: "$CI_PROJECT_DIR/uploads"
+
+# ---------------------------------------------------------------- templates
+
+.cache-m2: &cache-m2
+  cache:
+    key:
+      files:
+        - pom.xml
+    paths:
+      - .m2/repository
+
+.base-job: &base-job
+  image: maven:3.9-eclipse-temurin-21
+  before_script:
+    - mkdir -p uploads
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+# ---------------------------------------------------------------- build
+
+compile:
+  <<: *base-job
+  <<: *cache-m2
+  stage: build
+  script:
+    - mvn $MAVEN_CLI_OPTS -q compile
+  artifacts:
+    when: on_success
+    paths:
+      - target/classes
+    expire_in: 1 hour
+
+# ---------------------------------------------------------------- test
+
+unit-tests:
+  <<: *base-job
+  <<: *cache-m2
+  stage: test
+  script:
+    # RUN_E2E is intentionally NOT set: the 7 Selenium cases skip themselves
+    - mvn $MAVEN_CLI_OPTS test
+  coverage: '/Total.*?([0-9]{1,3})%/'
+  artifacts:
+    when: always
+    name: "test-reports-$CI_COMMIT_REF_SLUG"
+    paths:
+      - target/surefire-reports/
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+    expire_in: 1 week
+
+# ---------------------------------------------------------------- quality
+
+style-check:
+  <<: *base-job
+  <<: *cache-m2
+  stage: quality
+  script:
+    # the original repo lints with ruff; the Java sibling is Spotless. Not wired into
+    # the build, so quality here = full strict compile with -Werror on the javac level
+    - mvn $MAVEN_CLI_OPTS compiler:compile -Dmaven.compiler.showWarnings=true
+    # package the javadoc as a docs sanity check
+    - mvn $MAVEN_CLI_OPTS javadoc:javadoc -q
+
+dependency-scan:
+  <<: *base-job
+  <<: *cache-m2
+  stage: quality
+  allow_failure: true
+  script:
+    # OWASP dependency-check: known CVEs in the dependency tree
+    - mvn $MAVEN_CLI_OPTS org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=9
+  artifacts:
+    when: always
+    paths:
+      - target/dependency-check-report.html
+    expire_in: 1 week
+
+# ---------------------------------------------------------------- package
+
+package:
+  <<: *base-job
+  <<: *cache-m2
+  stage: package
+  script:
+    - mvn $MAVEN_CLI_OPTS -DskipTests package
+  artifacts:
+    paths:
+      - target/moments4j-*.jar
+    expire_in: 3 days
+
+# ---------------------------------------------------------------- e2e
+
+e2e-tests:
+  <<: *cache-m2
+  stage: e2e
+  # full Chrome in the image; Selenium Manager auto-resolves the driver
+  image: maven:3.9-eclipse-temurin-21
+  before_script:
+    - apt-get update -q && apt-get install -yq chromium wget
+    - export CHROME_BIN=/usr/bin/chromium
+    - mkdir -p uploads
+  rules:
+    # nightly, manual from the UI, and release tags only
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web" && $RUN_E2E == "true"
+    - if: $CI_COMMIT_TAG
+  script:
+    - RUN_E2E=true mvn $MAVEN_CLI_OPTS test -Dtest=UiTestCase
+  artifacts:
+    when: always
+    paths:
+      - target/surefire-reports/
+    reports:
+      junit:
+        - target/surefire-reports/TEST-moments4j.UiTestCase.xml
+    expire_in: 1 week
+  timeout: 30 minutes
+
+# ---------------------------------------------------------------- docker
+
+docker-build:
+  stage: docker
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+  timeout: 20 minutes
+
+# ---------------------------------------------------------------- release
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - echo "Release assets are attached below."
+  release:
+    name: "moments4j $CI_COMMIT_TAG"
+    description: "Release $CI_COMMIT_TAG of the moments4j Java port"
+    assets:
+      links:
+        - name: "moments4j.jar"
+        # the jar published by the package job of the same tag
+        - url: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/artifacts/$CI_COMMIT_TAG/raw/target/moments4j-1.0.0.jar?job=package"
+          link_type: package
