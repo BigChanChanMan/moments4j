@@ -52,7 +52,7 @@
             <div class="invalid-feedback" th:if="${err}" th:errors="*{description}">error</div>
           </div>
           <a class="btn btn-light btn-sm" id="cancel-description">Cancel</a>
-          <button type="submit" class="btn btn-success btn-sm description-submit-btn">Submit</button>
+          <button type="submit" name="submit" class="btn btn-success btn-sm description-submit-btn">Submit</button>
         </form>
       </div>
     </th:block>
@@ -86,7 +86,7 @@
             <div class="invalid-feedback" th:if="${err}" th:errors="*{tag}">error</div>
           </div>
           <a class="btn btn-light btn-sm" id="cancel-tag">Cancel</a>
-          <button type="submit" class="btn btn-success btn-sm">Submit</button>
+          <button type="submit" name="submit" class="btn btn-success btn-sm">Submit</button>
         </form>
         <th:block th:if="${!#lists.isEmpty(photo.tags)}">
           <hr>

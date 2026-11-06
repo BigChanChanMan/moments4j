@@ -95,7 +95,14 @@ java -jar target/moments4j-1.0.0.jar
 ## 测试
 
 ```bash
-mvn test   # 71 tests, 对应原项目 tests/test_*.py (test_ui 的 Selenium 用例未移植)
+mvn test   # 70 tests, 对应原项目 tests/test_*.py
+```
+
+E2E UI 测试(tests/test_ui.py 的移植,基于 Selenium + headless Chrome)默认跳过,需要显式开启:
+
+```bash
+# 需要: 本机安装 Chrome(首次运行 Selenium Manager 会自动下载匹配的 chromedriver)
+RUN_E2E=true mvn test -Dtest=UiTestCase
 ```
 
 ## 简化说明 (ponytail: 注释标记处)
@@ -103,7 +110,6 @@ mvn test   # 71 tests, 对应原项目 tests/test_*.py (test_ui 的 Selenium 用
 - **搜索**: whooshee 全文索引用 JPA `LIKE %q%` 代替; 数据量大或需要分词时再引入 Hibernate Search/Lucene。
 - **错误邮件**: logging.py 的 SMTPHandler(500 错误发邮件给管理员)未实现, logback 文件滚动已就位, 需要时在 logback-spring.xml 加 SMTPAppender。
 - **慢查询日志**: core/request.py 的 SQLAlchemy 查询计时未移植, 可用 p6spy 或 Hibernate statistics 替代。
-- **test_ui**: Selenium UI 测试未移植。
 
 ## License
 

@@ -111,6 +111,13 @@
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- E2E UI tests (tests/test_ui.py port); driver auto-managed by Selenium Manager -->
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>4.27.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

@@ -64,8 +64,9 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public Object loginPage(Model model) {
+    public Object loginPage(Model model, HttpServletRequest request, RedirectAttributes ra) {
         if (currentUserService.get() != null) {
+            carryFlash(request, ra);  // flask keeps flash in session across the extra redirect
             return new RedirectView("/");
         }
         model.addAttribute("form", new LoginForm());
@@ -152,8 +153,9 @@ public class AuthController {
     }
 
     @GetMapping("/register")
-    public Object registerPage(Model model) {
+    public Object registerPage(Model model, HttpServletRequest request, RedirectAttributes ra) {
         if (currentUserService.get() != null) {
+            carryFlash(request, ra);
             return new RedirectView("/");
         }
         model.addAttribute("form", new RegisterForm());
@@ -286,6 +288,14 @@ public class AuthController {
         }
         Utils.flash(ra, "danger", "Invalid or expired link.");
         return new RedirectView("/auth/forget-password");
+    }
+
+    /** Re-posts an unconsumed input flash map into the next redirect (flask.flash semantics). */
+    private void carryFlash(HttpServletRequest request, RedirectAttributes ra) {
+        var input = org.springframework.web.servlet.support.RequestContextUtils.getInputFlashMap(request);
+        if (input != null) {
+            input.forEach(ra::addFlashAttribute);
+        }
     }
 
     private String baseUrl(HttpServletRequest request) {
