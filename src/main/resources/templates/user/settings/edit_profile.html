@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Edit Profile</title>
+</head>
+<body>
+
+<section id="content">
+<div class="page-header">
+  <h1>Settings</h1>
+</div>
+<div class="row">
+<div th:replace="~{user/settings/base :: settings_nav}"></div>
+<div class="col-md-9">
+
+  <div class="card w-100 bg-light">
+    <h3 class="card-header">Edit Profile</h3>
+    <div class="card-body">
+      <form method="post" th:action="@{/user/settings/profile}" th:object="${form}">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+        <div class="mb-3" th:with="err=${#fields.hasErrors('name')}">
+          <label class="form-label" th:classappend="${err} ? 'text-danger'" for="name">Name</label>
+          <input type="text" class="form-control" th:classappend="${err} ? 'is-invalid'" id="name" th:field="*{name}">
+          <div class="invalid-feedback" th:if="${err}" th:errors="*{name}">error</div>
+        </div>
+        <div class="mb-3" th:with="err=${#fields.hasErrors('username')}">
+          <label class="form-label" th:classappend="${err} ? 'text-danger'" for="username">Username</label>
+          <input type="text" class="form-control" th:classappend="${err} ? 'is-invalid'" id="username" th:field="*{username}">
+          <div class="invalid-feedback" th:if="${err}" th:errors="*{username}">error</div>
+        </div>
+        <div class="mb-3" th:with="err=${#fields.hasErrors('website')}">
+          <label class="form-label" th:classappend="${err} ? 'text-danger'" for="website">Website</label>
+          <input type="text" class="form-control" th:classappend="${err} ? 'is-invalid'" id="website" th:field="*{website}">
+          <div class="invalid-feedback" th:if="${err}" th:errors="*{website}">error</div>
+        </div>
+        <div class="mb-3" th:with="err=${#fields.hasErrors('location')}">
+          <label class="form-label" th:classappend="${err} ? 'text-danger'" for="location">City</label>
+          <input type="text" class="form-control" th:classappend="${err} ? 'is-invalid'" id="location" th:field="*{location}">
+          <div class="invalid-feedback" th:if="${err}" th:errors="*{location}">error</div>
+        </div>
+        <div class="mb-3" th:with="err=${#fields.hasErrors('bio')}">
+          <label class="form-label" th:classappend="${err} ? 'text-danger'" for="bio">Bio</label>
+          <textarea class="form-control" th:classappend="${err} ? 'is-invalid'" id="bio" rows="4" th:field="*{bio}"></textarea>
+          <div class="invalid-feedback" th:if="${err}" th:errors="*{bio}">error</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+</body>
+</html>

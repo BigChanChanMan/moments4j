@@ -1,0 +1,134 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="comments">
+<div class="comments" id="comments">
+  <h4><th:block th:text="${v.comments(photo)}">0</th:block> Comments
+    <th:block th:if="${currentUser != null and currentUser.id == photo.author.id}">
+      <form class="inline" method="post" th:action="@{|/set-comment/${photo.id}|}">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+        <button type="submit" class="btn btn-xs btn-light float-end">
+          <th:block th:if="${photo.canComment}">Disable</th:block>
+          <th:block th:if="${!photo.canComment}">Enable</th:block> comment
+        </button>
+      </form>
+    </th:block>
+  </h4>
+  <hr>
+  <th:block th:if="${comments != null and !#lists.isEmpty(comments)}">
+    <div class="comment" th:each="comment : ${comments}">
+      <div class="comment-thumbnail">
+        <a th:href="@{|/user/${comment.author.username}|}">
+          <img class="rounded img-fluid avatar-s profile-popover"
+            th:data-href="@{|/ajax/profile/${comment.author.id}|}"
+            th:src="@{|/avatars/${comment.author.avatarM}|}">
+        </a>
+      </div>
+      <div class="comment-body">
+        <h6>
+          <a class="profile-popover text-decoration-none"
+            th:data-href="@{|/ajax/profile/${comment.author.id}|}"
+            th:href="@{|/user/${comment.author.username}|}">
+            <th:block th:text="${comment.author.name}">name</th:block>
+          </a>
+          <span th:if="${comment.author.id == photo.author.id}" class="badge text-bg-light rounded-pill">Author</span>
+          <small class="dayjs-tooltip" data-bs-toggle="tooltip" data-bs-placement="top"
+            data-bs-delay="500" th:data-timestamp="${comment.createdAt}">
+            <span class="dayjs-from-now" data-format="LL" th:text="${comment.createdAt}">date</span>
+          </small>
+          <th:block th:if="${currentUser != null}">
+            <span class="float-end">
+              <span class="dropdown">
+                <button class="btn btn-sm btn-light" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
+                  aria-haspopup="true" aria-expanded="false">
+                  <i class="bi bi-three-dots"></i>
+                </button>
+                <span class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <th:block th:if="${currentUser.id != comment.author.id}">
+                    <a class="dropdown-item btn" th:href="@{|/reply/comment/${comment.id}|}">
+                      <i class="bi bi-chat-left-fill"></i> Reply
+                    </a>
+                  </th:block>
+                  <th:block th:if="${currentUser.id == comment.author.id or currentUser.id == photo.author.id or v.can(currentUser, 'MODERATE')}">
+                    <a class="dropdown-item" data-bs-toggle="modal" href="#!"
+                      th:data-href="@{|/delete/comment/${comment.id}|}" data-bs-target="#delete-modal">
+                      <i class="bi bi-trash-fill"></i> Delete
+                    </a>
+                  </th:block>
+                  <th:block th:if="${currentUser.id != comment.author.id}">
+                    <form class="inline" method="post" th:action="@{|/report/comment/${comment.id}|}">
+                      <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+                      <button type="submit" class="dropdown-item">
+                        <i class="bi bi-flag-fill"></i> Report
+                      </button>
+                    </form>
+                  </th:block>
+                </span>
+              </span>
+            </span>
+          </th:block>
+        </h6>
+        <p>
+          <th:block th:if="${comment.replied != null}">
+            Reply
+            <a th:href="@{|/user/${comment.replied.author.username}|}" th:text="${comment.replied.author.name}">name</a>:
+          </th:block>
+          <th:block th:text="${comment.body}">body</th:block>
+        </p>
+      </div>
+    </div>
+    <hr>
+    <div class="page-footer">
+      <div th:replace="~{macros :: pagination(${pagination}, '/photo/' + ${photo.id})}"></div>
+    </div>
+  </th:block>
+  <th:block th:if="${comments == null or #lists.isEmpty(comments)}">
+    <p class="tip">No comments.</p>
+  </th:block>
+
+  <th:block th:if="${photo.canComment}">
+    <th:block th:if="${currentUser != null}">
+      <th:block th:if="${v.can(currentUser, 'COMMENT')}">
+        <th:block th:if="${reply != null}">
+          <div class="alert alert-dark">
+            Reply to <th:block th:text="${author}">author</th:block>:
+            <a class="float-end" th:href="@{|/photo/${photo.id}|}">Cancel</a>
+          </div>
+        </th:block>
+        <div class="comment-form-area">
+          <div class="comment-form-thumbnail">
+            <img class="rounded img-fluid avatar-s" th:src="@{|/avatars/${currentUser.avatarM}|}">
+          </div>
+          <div class="comment-form" id="comment-form">
+            <form class="text-right" method="post"
+              th:action="@{|/photo/${photo.id}/comment/new|(page=${pagination != null ? pagination.totalPages : 1}, reply=${reply})}"
+              th:object="${commentForm}">
+              <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+              <div class="mb-3" th:with="err=${#fields.hasErrors('body')}">
+                <textarea th:field="*{body}" rows="4"
+                          th:class="|form-control${err ? ' is-invalid' : ''}|"></textarea>
+                <div class="invalid-feedback" th:if="${err}" th:errors="*{body}">error</div>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </div>
+      </th:block>
+      <th:block th:if="${!v.can(currentUser, 'COMMENT')}">
+        <p class="tip">
+          No permission.
+        </p>
+      </th:block>
+    </th:block>
+    <th:block th:if="${currentUser == null}">
+      <p class="tip">
+        <a href="/auth/login">Login</a>
+        or
+        <a href="/auth/register">Register</a> to leave a comment.
+      </p>
+    </th:block>
+  </th:block>
+  <th:block th:if="${!photo.canComment}">
+    <p class="tip">
+      Comment disabled.
+    </p>
+  </th:block>
+</div>
+</div>

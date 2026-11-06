@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Change Avatar</title>
+</head>
+<body>
+
+<section id="content">
+<link rel="stylesheet" th:href="@{/static/jcrop/css/jquery.Jcrop.min.css}">
+<div class="page-header">
+  <h1>Settings</h1>
+</div>
+<div class="row">
+<div th:replace="~{user/settings/base :: settings_nav}"></div>
+<div class="col-md-9">
+
+  <div class="card w-100 bg-light">
+    <h3 class="card-header">Change Avatar</h3>
+    <div class="card-body">
+      <form method="post" th:action="@{/user/settings/avatar/upload}" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+        <div class="mb-3">
+          <label class="form-label" for="image">Upload</label>
+          <input type="file" class="form-control" id="image" name="image" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+      <small class="text-muted">
+        Your file's size must be less than 3 MB, the allowed formats are png and jpg.
+      </small>
+      <!-- avatars.crop_box equivalent: Jcrop widget over the raw avatar -->
+      <p class="mt-3" th:if="${currentUser.avatarRaw != null}">
+        <img id="crop-target" th:src="@{|/avatars/${currentUser.avatarRaw}|}" style="max-width: 500px;">
+      </p>
+      <th:block th:if="${currentUser.avatarRaw != null}">
+        <form method="post" th:action="@{/user/settings/avatar/crop}" th:object="${cropForm}">
+          <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+          <input type="hidden" id="x" name="x" th:field="*{x}">
+          <input type="hidden" id="y" name="y" th:field="*{y}">
+          <input type="hidden" id="w" name="w" th:field="*{w}">
+          <input type="hidden" id="h" name="h" th:field="*{h}">
+          <button type="submit" class="btn btn-primary">Crop and Update</button>
+        </form>
+      </th:block>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+<th:block id="page-scripts">
+<script th:src="@{/static/jcrop/js/jquery.min.js}"></script>
+<script th:src="@{/static/jcrop/js/jquery.Jcrop.min.js}"></script>
+<script>
+  // avatars.init_jcrop() equivalent: Jcrop on the raw avatar, updates x/y/w/h inputs
+  $(function () {
+    $('#crop-target').Jcrop({
+      aspectRatio: 1,
+      boxWidth: 500,
+      onSelect: function (c) {
+        $('#x').val(Math.round(c.x));
+        $('#y').val(Math.round(c.y));
+        $('#w').val(Math.round(c.w));
+        $('#h').val(Math.round(c.h));
+      }
+    });
+  });
+</script>
+</th:block>
+
+</body>
+</html>

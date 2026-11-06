@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Port of templates/macros.html -->
+<!-- pagination(page, baseUrl): renders bootstrap pagination; baseUrl has any
+     query params baked in already (Thymeleaf appends ?page=/&page= correctly) -->
+
+<body>
+
+<div th:fragment="photo_card(photo)" class="photo-card card">
+  <a class="card-thumbnail" th:href="@{|/photo/${photo.id}|}">
+    <img class="card-img-top portrait" th:src="@{|/images/${photo.filenameS}|}">
+  </a>
+  <div class="card-body">
+    <i class="bi bi-suit-heart-fill"></i> <th:block th:text="${v.collectors(photo)}">0</th:block>
+    <i class="bi bi-chat-left-fill"></i> <th:block th:text="${v.comments(photo)}">0</th:block>
+  </div>
+</div>
+
+<div th:fragment="user_card(user)" class="user-card text-center">
+  <a th:href="@{|/user/${user.username}|}">
+    <img class="rounded avatar-m" th:src="@{|/avatars/${user.avatarM}|}">
+  </a>
+  <h6>
+    <a class="text-decoration-none" th:href="@{|/user/${user.username}|}" th:text="${user.name}">name</a>
+  </h6>
+  <div th:replace="~{::follow_area(${user})}"></div>
+</div>
+
+<div th:fragment="follow_area(user)">
+  <th:block th:if="${currentUser != null}">
+    <th:block th:if="${user.id != currentUser.id}">
+      <th:block th:if="${v.following(currentUser, user)}">
+        <form class="inline" method="post" th:action="@{|/user/unfollow/${user.username}|(next=${requestPath})}">
+          <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+          <button type="submit" class="btn btn-secondary btn-sm">Unfollow</button>
+          <p th:if="${v.followedBy(currentUser, user)}" class="badge text-bg-light rounded-pill">Follow each other</p>
+        </form>
+      </th:block>
+      <th:block th:if="${!v.following(currentUser, user)}">
+        <form class="inline" method="post" th:action="@{|/user/follow/${user.username}|(next=${requestPath})}">
+          <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+          <button type="submit" class="btn btn-primary btn-sm">Follow</button>
+          <p th:if="${v.followedBy(currentUser, user)}" class="badge text-bg-light rounded-pill">Follows you</p>
+        </form>
+      </th:block>
+    </th:block>
+  </th:block>
+  <th:block th:if="${currentUser == null}">
+    <form class="inline" method="post" th:action="@{|/user/follow/${user.username}|}">
+      <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+      <button type="submit" class="btn btn-primary btn-sm">Follow</button>
+    </form>
+  </th:block>
+</div>
+
+<nav th:fragment="pagination(page, baseUrl)" aria-label="Page navigation"
+     th:if="${page != null}">
+  <ul class="pagination justify-content-center">
+    <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+      <a class="page-link" th:href="@{${baseUrl}(page=${page.number})}">&laquo;</a>
+    </li>
+    <li class="page-item" th:each="i : ${#numbers.sequence(1, page.totalPages)}"
+        th:classappend="${i == page.number + 1} ? 'active'">
+      <a class="page-link" th:href="@{${baseUrl}(page=${i})}" th:text="${i}">1</a>
+    </li>
+    <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+      <a class="page-link" th:href="@{${baseUrl}(page=${page.number + 2})}">&raquo;</a>
+    </li>
+  </ul>
+</nav>
+
+<!-- render_field equivalent: a bootstrap-styled form field.
+     name: model field path, label, type, placeholder, value -->
+<div th:fragment="field(name, label, type, placeholder)">
+  <div class="mb-3" th:with="err=${#fields != null and #fields.hasErrors(name)}">
+    <label th:if="${label != null}" th:classappend="${err} ? 'text-danger'"
+           class="form-label" th:for="${#ids.seq(name)}" th:text="${label}">label</label>
+    <input th:type="${type}" th:class="|form-control${err ? ' is-invalid' : ''}|" th:id="${#ids.seq(name)}"
+           th:field="*{__${name}__}" th:placeholder="${placeholder}">
+    <div class="invalid-feedback" th:if="${err}" th:errors="${name}">error</div>
+  </div>
+</div>
+
+<div th:fragment="textarea_field(name, label, rows)">
+  <div class="mb-3" th:with="err=${#fields != null and #fields.hasErrors(name)}">
+    <label th:if="${label != null}" th:classappend="${err} ? 'text-danger'"
+           class="form-label" th:for="${#ids.seq(name)}" th:text="${label}">label</label>
+    <textarea th:class="|form-control${err ? ' is-invalid' : ''}|" th:id="${#ids.seq(name)}"
+              th:rows="${rows}" th:field="*{__${name}__}"></textarea>
+    <div class="invalid-feedback" th:if="${err}" th:errors="${name}">error</div>
+  </div>
+</div>
+
+<div th:fragment="checkbox_field(name, label)">
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" th:id="${#ids.seq(name)}" th:field="*{__${name}__}">
+    <label class="form-check-label" th:for="${#ids.seq(name)}" th:text="${label}">label</label>
+  </div>
+</div>
+
+<div th:fragment="select_field(name, label, items, itemValue, itemText)">
+  <div class="mb-3" th:with="err=${#fields != null and #fields.hasErrors(name)}">
+    <label th:if="${label != null}" th:classappend="${err} ? 'text-danger'"
+           class="form-label" th:for="${#ids.seq(name)}" th:text="${label}">label</label>
+    <select th:class="|form-select${err ? ' is-invalid' : ''}|" th:id="${#ids.seq(name)}"
+            th:field="*{__${name}__}">
+      <option th:each="item : ${items}" th:value="${itemValue}" th:text="${itemText}">opt</option>
+    </select>
+    <div class="invalid-feedback" th:if="${err}" th:errors="${name}">error</div>
+  </div>
+</div>
+
+<div th:fragment="submit_button(text, class)">
+  <button type="submit" th:class="${class != null ? class : 'btn btn-primary'}" th:text="${text}">Submit</button>
+</div>
+
+</body>
+</html>

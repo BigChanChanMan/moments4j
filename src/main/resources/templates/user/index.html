@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title th:text="${user.name}">User</title>
+</head>
+<body>
+
+<section id="content">
+<div th:replace="~{user/_header :: user_header(${user})}"></div>
+<div class="row">
+  <div class="col-md-12">
+    <th:block th:if="${!#lists.isEmpty(photos)}">
+      <th:block th:each="photo : ${photos}">
+        <div th:replace="~{macros :: photo_card(${photo})}"></div>
+      </th:block>
+    </th:block>
+    <th:block th:if="${#lists.isEmpty(photos)}">
+      <div class="tip text-center">
+        <h3>No photos.</h3>
+        <th:block th:if="${currentUser != null and currentUser.id == user.id}">
+          <a class="btn btn-light" href="/upload">Upload</a>
+        </th:block>
+        <th:block th:if="${currentUser == null or currentUser.id != user.id}">
+          <a class="btn btn-light" href="/explore">Explore</a>
+        </th:block>
+      </div>
+    </th:block>
+  </div>
+</div>
+<th:block th:if="${!#lists.isEmpty(photos)}">
+  <div class="page-footer">
+    <div th:replace="~{macros :: pagination(${pagination}, '/user/' + ${user.username})}"></div>
+  </div>
+</th:block>
+</section>
+
+</body>
+</html>

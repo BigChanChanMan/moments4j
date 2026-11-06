@@ -1,0 +1,109 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="photo_sidebar">
+
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    <li class="page-item">
+      <a class="page-link" th:href="@{|/photo/p/${photo.id}|}">&larr; Previous</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" th:href="@{|/photo/n/${photo.id}|}">Next &rarr;</a>
+    </li>
+  </ul>
+</nav>
+<div class="card bg-light mb-3 sidebar-card">
+  <div class="card-body">
+    <div class="row row-cols-auto">
+      <div class="col">
+        <a th:href="@{|/user/${photo.author.username}|}">
+          <img class="rounded avatar-m" th:src="@{|/avatars/${photo.author.avatarM}|}">
+        </a>
+      </div>
+      <div class="col">
+        <h6 class="card-title">
+          <a class="text-decoration-none" th:href="@{|/user/${photo.author.username}|}" th:text="${photo.author.name}">name</a>
+        </h6>
+        <p class="card-subtitle mb-2 text-muted" th:text="${photo.author.username}">username</p>
+        <div th:replace="~{macros :: follow_area(${photo.author})}"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card bg-light mb-3">
+  <div class="card-body">
+    <div id="description">
+      <p>
+        <th:block th:if="${photo.description}" th:text="${photo.description}">desc</th:block>
+        <th:block th:if="${photo.description == null}">
+          <small class="text-muted">No description</small>
+        </th:block>
+        <th:block th:if="${currentUser != null and currentUser.id == photo.author.id}">
+          <a id="description-btn" href="#!">
+            <small><i class="bi bi-pencil-fill"></i></small>
+          </a>
+        </th:block>
+      </p>
+    </div>
+    <th:block th:if="${currentUser != null and currentUser.id == photo.author.id}">
+      <div id="description-form">
+        <form th:action="@{|/photo/${photo.id}/description|}" method="post" th:object="${descriptionForm}">
+          <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+          <div class="mb-3" th:with="err=${#fields.hasErrors('description')}">
+            <textarea class="form-control" rows="3" th:field="*{description}"></textarea>
+            <div class="invalid-feedback" th:if="${err}" th:errors="*{description}">error</div>
+          </div>
+          <a class="btn btn-light btn-sm" id="cancel-description">Cancel</a>
+          <button type="submit" class="btn btn-success btn-sm description-submit-btn">Submit</button>
+        </form>
+      </div>
+    </th:block>
+    <div id="tags">
+      <p>
+        <th:block th:if="${!#lists.isEmpty(photo.tags)}">
+          <th:block th:each="tag : ${photo.tags}">
+            <a class="badge text-bg-secondary rounded-pill text-decoration-none"
+               th:href="@{|/tag/${tag.id}|}" target="_blank">
+              <i class="bi bi-tag-fill"></i> <th:block th:text="${tag.name}">tag</th:block>
+            </a>
+          </th:block>
+        </th:block>
+        <th:block th:if="${#lists.isEmpty(photo.tags)}">
+          <small class="text-muted">No tags</small>
+        </th:block>
+        <th:block th:if="${currentUser != null and currentUser.id == photo.author.id}">
+          <a id="tag-btn" href="#!">
+            <small><i class="bi bi-pencil-fill"></i></small>
+          </a>
+        </th:block>
+      </p>
+    </div>
+    <th:block th:if="${currentUser != null and currentUser.id == photo.author.id}">
+      <div id="tag-form">
+        <form th:action="@{|/photo/${photo.id}/tag/new|}" method="post" th:object="${tagForm}">
+          <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+          <div class="mb-3" th:with="err=${#fields.hasErrors('tag')}">
+            <input type="text" class="form-control" th:field="*{tag}"
+                   placeholder="Add Tag (use space to separate)">
+            <div class="invalid-feedback" th:if="${err}" th:errors="*{tag}">error</div>
+          </div>
+          <a class="btn btn-light btn-sm" id="cancel-tag">Cancel</a>
+          <button type="submit" class="btn btn-success btn-sm">Submit</button>
+        </form>
+        <th:block th:if="${!#lists.isEmpty(photo.tags)}">
+          <hr>
+          <th:block th:each="tag : ${photo.tags}">
+            <a class="dead-link" href="#!" th:data-href="@{|/delete/tag/${photo.id}/${tag.id}|}"
+              data-bs-toggle="modal" data-bs-target="#delete-modal" title="Delete tag">
+              <span class="badge text-bg-danger rounded-pill">
+                <th:block th:text="${tag.name}">tag</th:block> <i class="bi bi-trash-fill"></i></span>
+            </a>
+          </th:block>
+        </th:block>
+      </div>
+    </th:block>
+    <th:block th:if="${!#lists.isEmpty(photo.collections)}">
+      <a class="text-decoration-none" th:href="@{|/photo/${photo.id}/collectors|}">
+        <th:block th:text="${v.collectors(photo)}">0</th:block> collectors</a>
+    </th:block>
+  </div>
+</div>
+</div>

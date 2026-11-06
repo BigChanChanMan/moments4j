@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/index :: admin_layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Manage Users</title>
+</head>
+<body>
+
+<section id="content">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li th:replace="~{admin/index :: crumb('/admin/', 'Dashboard Home')}"></li>
+    <li class="breadcrumb-item active" aria-current="page">Manage User</li>
+  </ol>
+</nav>
+<div class="page-header">
+  <h1>Users
+    <small class="text-muted" th:text="${pagination != null ? pagination.totalElements : 0}">0</small>
+  </h1>
+  <ul class="nav nav-pills">
+    <li class="nav-item">
+      <a class="nav-link disabled" href="#">Filter </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" th:classappend="${filter == null or filter == 'all'} ? 'active'"
+        th:href="@{/admin/manage/user(filter='all')}">All</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" th:classappend="${filter == 'locked'} ? 'active'"
+        th:href="@{/admin/manage/user(filter='locked')}">Locked</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" th:classappend="${filter == 'blocked'} ? 'active'"
+        th:href="@{/admin/manage/user(filter='blocked')}">Blocked</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" th:classappend="${filter == 'administrator'} ? 'active'"
+        th:href="@{/admin/manage/user(filter='administrator')}">Administrator</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" th:classappend="${filter == 'moderator'} ? 'active'"
+        th:href="@{/admin/manage/user(filter='moderator')}">Moderator</a>
+    </li>
+  </ul>
+</div>
+<th:block th:if="${!#lists.isEmpty(users)}">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Avatars</th>
+      <th>Name/username</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Bio</th>
+      <th>City</th>
+      <th>Date</th>
+      <th>Photos</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tr th:each="user : ${users}">
+    <td><img th:src="@{|/avatars/${user.avatarS}|}"></td>
+    <td><th:block th:text="${user.name}">name</th:block><br><th:block th:text="${user.username}">username</th:block></td>
+    <td th:text="${user.email}">email</td>
+    <td th:text="${user.role != null ? user.role.name : ''}">role</td>
+    <td th:text="${user.bio}">bio</td>
+    <td th:text="${user.location}">city</td>
+    <td><span class="dayjs" data-format="LL" th:text="${user.memberSince}">date</span></td>
+    <td>
+      <a class="text-decoration-none" th:href="@{|/user/${user.username}|}" th:text="${v.photos(user)}">0</a>
+    </td>
+    <td>
+      <th:block th:if="${user.role != null and user.role.name != 'Administrator' and user.role.name != 'Moderator'}">
+        <th:block th:if="${user.locked}">
+          <form class="inline" th:action="@{|/admin/unlock/user/${user.id}|}" method="post">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+            <input type="submit" onclick="return confirm('Are you sure?');" class="btn btn-secondary btn-sm" value="Unlock">
+          </form>
+        </th:block>
+        <th:block th:if="${!user.locked}">
+          <form class="inline" th:action="@{|/admin/lock/user/${user.id}|}" method="post">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+            <input type="submit" onclick="return confirm('Are you sure?');" class="btn btn-warning btn-sm" value="Lock">
+          </form>
+        </th:block>
+        <th:block th:if="${user.active}">
+          <form class="inline" th:action="@{|/admin/block/user/${user.id}|}" method="post">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+            <input type="submit" onclick="return confirm('Are you sure?');" class="btn btn-warning btn-sm" value="Block">
+          </form>
+        </th:block>
+        <th:block th:if="${!user.active}">
+          <form class="inline" th:action="@{|/admin/unblock/user/${user.id}|}" method="post">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+            <input type="submit" onclick="return confirm('Are you sure?');" class="btn btn-secondary btn-sm"
+              value="Unblock">
+          </form>
+        </th:block>
+      </th:block>
+      <a class="btn btn-light btn-sm" th:href="|mailto:${user.email}|">Email</a>
+      <th:block th:if="${v.isAdmin(currentUser)}">
+        <a class="btn btn-warning btn-sm" th:href="@{|/admin/profile/${user.id}|}">Edit profile</a>
+      </th:block>
+    </td>
+  </tr>
+</table>
+<div class="page-footer">
+  <div th:replace="~{macros :: pagination(${pagination}, ${filter != null and filter != 'all' ? '/admin/manage/user?filter=' + filter : '/admin/manage/user'})}"></div>
+</div>
+</th:block>
+<th:block th:if="${#lists.isEmpty(users)}">
+  <div class="tip">
+    <h5>No users.</h5>
+  </div>
+</th:block>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Notifications</title>
+</head>
+<body>
+
+<section id="content">
+<div class="page-header">
+  <h1>Notifications</h1>
+</div>
+<div class="row">
+  <div class="col-md-3">
+    <div class="nav nav-pills flex-column" role="tablist" aria-orientation="vertical">
+      <a class="nav-item nav-link" th:classappend="${filter == null or filter != 'unread'} ? 'active'"
+        th:href="@{/notifications(filter='all')}">
+        All
+      </a>
+      <a class="nav-item nav-link" th:classappend="${filter == 'unread'} ? 'active'"
+        th:href="@{/notifications(filter='unread')}">
+        Unread
+      </a>
+    </div>
+  </div>
+  <div class="col-md-9">
+    <div class="card bg-light w-100">
+      <div class="card-header"><th:block th:text="${notificationCount}">0</th:block> unread notifications
+        <div class="float-end">
+          <a class="btn btn-light btn-sm" href="/user/settings/notification">
+            <i class="bi bi-gear-fill"></i> Settings
+          </a>
+          <form class="inline" method="post" th:action="@{/notifications/read/all}">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+            <button type="submit" class="btn btn-light btn-sm">
+              <i class="bi bi-check-all"></i> Read all
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="card-body">
+        <th:block th:if="${!#lists.isEmpty(notifications)}">
+          <ul class="list-group">
+            <li class="list-group-item" th:each="notification : ${notifications}">
+              <th:block th:utext="${notification.message}">message</th:block>
+              <span class="float-end">
+                <span class="dayjs-from-now" th:text="${notification.createdAt}">date</span>
+                <th:block th:if="${!notification.read}">
+                  <form class="inline" th:action="@{|/notifications/read/${notification.id}|}" method="post">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+                    <button type="submit" class="btn btn-light btn-sm">
+                      <i class="bi bi-check-lg"></i>
+                    </button>
+                  </form>
+                </th:block>
+              </span>
+            </li>
+          </ul>
+          <div class="text-right page-footer">
+            <div th:replace="~{macros :: pagination(${pagination},
+              ${filter == 'unread' ? '/notifications?filter=unread' : '/notifications'})}"></div>
+          </div>
+        </th:block>
+        <th:block th:if="${#lists.isEmpty(notifications)}">
+          <div class="tip text-center">
+            <h6>No notifications.</h6>
+          </div>
+        </th:block>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+</body>
+</html>

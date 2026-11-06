@@ -1,0 +1,46 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="popup">
+<div class="popup-card">
+  <img class="rounded img-fluid avatar-s popup-avatar" th:src="@{|/avatars/${user.avatarM}|}">
+  <div class="popup-profile">
+    <h6 th:text="${user.name}">name</h6>
+    <p class="text-muted" th:text="${user.username}">username
+      <th:block th:if="${currentUser != null and currentUser.id != user.id and v.followedBy(user, currentUser)}">
+        <th:block th:if="${v.followedBy(currentUser, user)}">
+          <span class="badge text-bg-light rounded-pill">Follow each other</span>
+        </th:block>
+        <th:block th:if="${!v.followedBy(currentUser, user)}">
+          <span class="badge text-bg-light rounded-pill">Follows you</span>
+        </th:block>
+      </th:block>
+    </p>
+  </div>
+  <p class="card-text">
+    <a class="text-decoration-none" th:href="@{|/user/${user.username}|}">
+      <strong th:text="${v.photos(user)}">0</strong> Photos
+    </a>&nbsp;
+    <a class="text-decoration-none" th:href="@{|/user/${user.username}/followers|}">
+      <strong th:id="|followers-count-${user.id}|" th:data-href="@{|/ajax/followers-count/${user.id}|}">
+        <th:block th:text="${v.followers(user)}">0</th:block>
+      </strong> Followers
+    </a>
+  </p>
+  <a th:href="@{|/user/${user.username}|}" class="btn btn-light btn-sm">Homepage</a>
+  <th:block th:if="${currentUser != null}">
+    <th:block th:if="${user.id != currentUser.id}">
+      <a th:data-id="${user.id}" th:data-href="@{|/ajax/unfollow/${user.username}|}"
+        th:classappend="${!v.following(currentUser, user)} ? 'hide'"
+        class="btn btn-secondary btn-sm unfollow-btn" title="Unfollow">
+        Unfollow
+      </a>
+      <a th:data-id="${user.id}" th:data-href="@{|/ajax/follow/${user.username}|}"
+        th:classappend="${v.following(currentUser, user)} ? 'hide'"
+        class="btn btn-primary btn-sm follow-btn" title="Follow">
+        Follow
+      </a>
+    </th:block>
+  </th:block>
+  <th:block th:if="${currentUser == null}">
+    <a th:href="@{|/auth/login|(next='/user/' + ${user.username})}" class="btn btn-primary btn-sm">Follow</a>
+  </th:block>
+</div>
+</div>

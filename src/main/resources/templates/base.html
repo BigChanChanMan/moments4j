@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Port of templates/base.html.
+     layout(title, content) renders the whole document;
+     pages do: <html th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}"> -->
+
+<html lang="en" th:fragment="layout(title, content)">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title th:replace="${title}">Moments</title>
+  <link rel="shortcut icon" th:href="@{/static/favicon.ico}">
+  <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" th:href="@{/static/css/style.css}">
+</head>
+
+<body lang="en">
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <img th:src="@{/static/favicon.ico}" alt="Moments">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar"
+        aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbar">
+        <div class="navbar-nav me-auto">
+          <a class="nav-link" href="/">Home</a>
+          <a class="nav-link" href="/explore">Explore</a>
+          <form class="d-flex" role="search" th:action="@{/search}">
+            <input class="form-control me-2" name="q" type="search" placeholder="Photo, tag or user" aria-label="Search" required>
+            <button class="btn btn-light my-2 my-sm-0" type="submit">
+              <i class="bi bi-search"></i>
+            </button>
+          </form>
+        </div>
+        <div class="navbar-nav ms-auto">
+          <th:block th:if="${currentUser != null}">
+            <a class="nav-item nav-link" th:href="@{/notifications(filter='unread')}">
+              <span class="position-relative">
+                <i class="bi bi-bell-fill"></i>
+                <span
+                  id="notification-badge"
+                  th:classappend="${notificationCount == 0} ? 'hide'"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  th:data-href="@{/ajax/notifications-count}"
+                >
+                  <th:block th:text="${notificationCount}">0</th:block>
+                  <span class="visually-hidden">unread messages</span>
+                </span>
+              </span>
+            </a>
+            <a class="nav-item nav-link" href="/upload" title="Upload">
+              <i class="bi bi-plus-circle-fill"></i>
+            </a>
+            <div class="dropdown nav-item">
+              <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                <img class="avatar-xs" th:src="@{|/avatars/${currentUser.avatarS}|}">
+                <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" role="menu">
+                <h6 class="dropdown-header">Logged in as <th:block th:text="${currentUser.username}">user</th:block></h6>
+                <li>
+                  <a class="dropdown-item" th:href="@{|/user/${currentUser.username}|}">
+                    <i class="bi bi-person-fill"></i> My Home
+                  </a>
+                </li>
+                <div class="dropdown-divider"></div>
+                <li>
+                  <a class="dropdown-item" href="/user/settings/profile">
+                    <i class="bi bi-gear-fill"></i> Settings
+                  </a>
+                </li>
+                <li th:if="${v.can(currentUser, 'MODERATE')}">
+                  <a class="dropdown-item" href="/admin/">
+                    <i class="bi bi-speedometer"></i> Dashboard
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="/auth/logout">
+                    <i class="bi bi-power"></i> Logout
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </th:block>
+          <th:block th:if="${currentUser == null}">
+            <a class="btn btn-outline-primary" href="/auth/login">Login</a>&nbsp;&nbsp;
+            <a class="btn btn-primary" href="/auth/register">Join Moments</a>
+          </th:block>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+      <!-- flash messages (render_messages equivalent) -->
+      <th:block th:if="${flashes != null}">
+        <div th:each="f : ${flashes}"
+             th:class="|alert alert-${f[0]} alert-dismissible fade show|">
+          <div th:utext="${f[1]}">message</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      </th:block>
+      <th:block th:insert="${content}"></th:block>
+      <footer>
+        <p class="float-start">
+          <small>&copy; 2025 Moments -
+            <a href="https://greyli.com" title="Written by Grey Li">Grey Li</a> -
+            <a href="https://github.com/greyli/moments" title="Fork me on GitHub">GitHub</a> -
+            <a href="https://helloflask.com" title="A HelloFlask project">HelloFlask</a>
+          </small>
+        </p>
+        <p class="float-end">
+          <small>Capture and share every wonderful moment.</small>
+        </p>
+      </footer>
+    </div>
+  </main>
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="mainToast" class="toast align-items-center border-0 text-bg-secondary" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body text-white"></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script th:src="@{/static/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{/static/js/dayjs/dayjs.min.js}"></script>
+  <script th:src="@{/static/js/dayjs/plugin/relativeTime.js}"></script>
+  <script th:src="@{/static/js/dayjs/plugin/utc.js}"></script>
+  <script th:src="@{/static/js/dayjs/plugin/localizedFormat.js}"></script>
+  <script th:src="@{/static/js/main.js}"></script>
+  <script type="text/javascript">
+    const csrfToken = "[[${_csrf != null ? _csrf.token : ''}]]";
+    const isAuthenticated = [[${currentUser != null}]];
+  </script>
+</body>
+
+</html>

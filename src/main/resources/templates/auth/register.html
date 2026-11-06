@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Register</title>
+</head>
+<body>
+
+<section id="content">
+<div class="jumbotron">
+  <div class="row">
+    <div class="col-md-8">
+      <img th:src="@{/static/images/index.jpg}" class="rounded img-fluid">
+    </div>
+    <div class="col-md-4">
+      <div class="card mb-3 w-100 bg-light">
+        <div class="card-header">
+          <h4>Welcome to Moments!</h4>
+        </div>
+        <div class="card-body">
+          <form method="post" th:action="@{/auth/register}" th:object="${form}">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+            <div class="mb-3" th:with="err=${#fields.hasErrors('name')}">
+              <label class="form-label" th:classappend="${err} ? 'text-danger'" for="name">Name</label>
+              <input type="text" class="form-control" th:classappend="${err} ? 'is-invalid'" id="name" th:field="*{name}">
+              <div class="invalid-feedback" th:if="${err}" th:errors="*{name}">error</div>
+            </div>
+            <div class="mb-3" th:with="err=${#fields.hasErrors('email')}">
+              <label class="form-label" th:classappend="${err} ? 'text-danger'" for="email">Email</label>
+              <input type="email" class="form-control" th:classappend="${err} ? 'is-invalid'" id="email" th:field="*{email}">
+              <div class="invalid-feedback" th:if="${err}" th:errors="*{email}">error</div>
+            </div>
+            <div class="mb-3" th:with="err=${#fields.hasErrors('username')}">
+              <label class="form-label" th:classappend="${err} ? 'text-danger'" for="username">Username</label>
+              <input type="text" class="form-control" th:classappend="${err} ? 'is-invalid'" id="username" th:field="*{username}">
+              <div class="invalid-feedback" th:if="${err}" th:errors="*{username}">error</div>
+            </div>
+            <div class="mb-3" th:with="err=${#fields.hasErrors('password')}">
+              <label class="form-label" th:classappend="${err} ? 'text-danger'" for="password">Password</label>
+              <input type="password" class="form-control" th:classappend="${err} ? 'is-invalid'" id="password" th:field="*{password}">
+              <div class="invalid-feedback" th:if="${err}" th:errors="*{password}">error</div>
+            </div>
+            <div class="mb-3" th:with="err=${#fields.hasErrors('password2')}">
+              <label class="form-label" th:classappend="${err} ? 'text-danger'" for="password2">Confirm password</label>
+              <input type="password" class="form-control" th:classappend="${err} ? 'is-invalid'" id="password2" th:field="*{password2}">
+              <div class="invalid-feedback" th:if="${err}" th:errors="*{password2}">error</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create account</button>
+          </form>
+          <hr>
+          <small>Already have an account? <a href="/auth/login">Click here to log in.</a>
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+</body>
+</html>

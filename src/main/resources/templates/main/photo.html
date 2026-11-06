@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title th:text="|${photo.author.name}'s Photo|">Photo</title>
+</head>
+<body>
+
+<section id="content">
+<div class="row">
+  <div class="col-lg-8">
+    <div class="photo">
+      <a th:href="@{|/images/${photo.filename}|}" target="_blank">
+        <img class="img-fluid" th:src="@{|/images/${photo.filenameM}|}">
+      </a>
+      <span class="photo-bottom"></span>
+    </div>
+    <th:block th:if="${currentUser != null}">
+      <th:block th:if="${v.collecting(currentUser, photo)}">
+        <form class="inline" method="post" th:action="@{|/uncollect/${photo.id}|}">
+          <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+          <button type="submit" class="btn btn-danger btn-sm" title="Uncollect">
+            <i class="bi bi-suit-heart-fill"></i>
+          </button>
+        </form>
+      </th:block>
+      <th:block th:if="${!v.collecting(currentUser, photo)}">
+        <form class="inline" method="post" th:action="@{|/collect/${photo.id}|}">
+          <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+          <button type="submit" class="btn btn-light btn-sm" title="Collect">
+            <i class="bi bi-suit-heart" style="color: red;"></i>
+          </button>
+        </form>
+      </th:block>
+    </th:block>
+    <th:block th:if="${currentUser == null}">
+      <form class="inline" method="post" th:action="@{|/collect/${photo.id}|}">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+        <button type="submit" class="btn btn-primary btn-sm" title="Collect">
+          <i class="bi bi-suit-heart"></i>
+        </button>
+      </form>
+    </th:block>
+    <a class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#share-modal" title="Share"><i class="bi bi-share-fill"></i></a>
+    <a th:if="${currentUser != null and (currentUser.id == photo.author.id or v.can(currentUser, 'MODERATE'))}"
+      class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#delete-modal"
+      th:data-href="@{|/delete/photo/${photo.id}|}" title="Delete"><i class="bi bi-trash-fill"></i></a>
+    <form th:if="${currentUser != null and currentUser.id != photo.author.id}" class="inline" method="post"
+      th:action="@{|/report/photo/${photo.id}|}">
+      <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+      <button type="submit" class="btn btn-light btn-sm" title="Report"><i class="bi bi-flag-fill"></i></button>
+    </form>
+    <p class="text-muted float-end small">
+      <i class="bi bi-clock-fill"></i> Upload at <span class="dayjs" data-format="LL" th:text="${photo.createdAt}">date</span>
+    </p>
+    <div th:replace="~{main/_comment :: comments}"></div>
+  </div>
+  <div class="col-lg-4">
+    <div th:replace="~{main/_photo_sidebar :: photo_sidebar}"></div>
+  </div>
+</div>
+<!-- share modal -->
+<div class="modal fade" id="share-modal" tabindex="-1" role="dialog" aria-labelledby="shareModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="shareModalLabel">Permalink</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body w-100">
+        <input class="form-control" th:value="|${baseUrl}/photo/${photo.id}|" readonly>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- delete confirm modal -->
+<th:block th:if="${currentUser != null}">
+<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">Delete Confirm</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this item?</p>
+      </div>
+      <div class="modal-footer">
+        <form class="delete-form" action="" method="post">
+          <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-danger btn-confirm" type="submit">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</th:block>
+</section>
+
+</body>
+</html>

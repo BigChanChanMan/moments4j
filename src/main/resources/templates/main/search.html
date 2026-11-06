@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title th:text="|Search: ${q}|">Search</title>
+</head>
+<body th:with="searchUrl=@{/search(q=${q}, category=${category})}">
+
+<section id="content">
+<div class="page-header">
+  <h1>Search: <th:block th:text="${q}">q</th:block></h1>
+</div>
+<div class="row">
+  <div class="col-md-3">
+    <div class="nav nav-pills flex-column" role="tablist" aria-orientation="vertical">
+      <a class="nav-item nav-link" th:classappend="${category == 'photo'} ? 'active'"
+        th:href="@{/search(q=${q}, category='photo')}">Photo</a>
+      <a class="nav-item nav-link" th:classappend="${category == 'user'} ? 'active'"
+        th:href="@{/search(q=${q}, category='user')}">User</a>
+      <a class="nav-item nav-link" th:classappend="${category == 'tag'} ? 'active'"
+        th:href="@{/search(q=${q}, category='tag')}">Tag</a>
+    </div>
+  </div>
+  <div class="col-md-9">
+    <th:block th:if="${!#lists.isEmpty(results)}">
+      <h5><th:block th:text="${#lists.size(results)}">0</th:block> results</h5>
+      <th:block th:each="item : ${results}">
+        <th:block th:if="${category == 'photo'}">
+          <div th:replace="~{macros :: photo_card(${item})}"></div>
+        </th:block>
+        <th:block th:if="${category == 'user'}">
+          <div th:replace="~{macros :: user_card(${item})}"></div>
+        </th:block>
+        <th:block th:if="${category == 'tag'}">
+          <a class="badge text-bg-light rounded-pill" th:href="@{|/tag/${item.id}|}">
+            <th:block th:text="${item.name}">tag</th:block> <th:block th:text="${#lists.size(item.photos)}">0</th:block>
+          </a>
+        </th:block>
+      </th:block>
+    </th:block>
+    <th:block th:if="${#lists.isEmpty(results)}">
+      <h5 class="tip">No results.</h5>
+    </th:block>
+  </div>
+</div>
+<th:block th:if="${!#lists.isEmpty(results)}">
+  <div class="page-footer">
+    <div th:replace="~{macros :: pagination(${pagination}, ${searchUrl})}"></div>
+  </div>
+</th:block>
+</section>
+
+</body>
+</html>

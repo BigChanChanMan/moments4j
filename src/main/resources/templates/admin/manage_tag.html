@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/index :: admin_layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Manage Tags</title>
+</head>
+<body>
+
+<section id="content">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li th:replace="~{admin/index :: crumb('/admin/', 'Dashboard Home')}"></li>
+    <li class="breadcrumb-item active" aria-current="page">Manage Tag</li>
+  </ol>
+</nav>
+<div class="page-header">
+  <h1>Tags
+    <small class="text-muted" th:text="${pagination != null ? pagination.totalElements : 0}">0</small>
+  </h1>
+</div>
+<th:block th:if="${!#lists.isEmpty(tags)}">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>No.</th>
+      <th>Name</th>
+      <th>Photos</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tr th:each="tag : ${tags}">
+    <td th:text="${tag.id}">1</td>
+    <td th:text="${tag.name}">tag</td>
+    <td><a class="text-decoration-none" th:href="@{|/tag/${tag.id}|}" th:text="${v.tagPhotos(tag)}">0</a></td>
+    <td>
+      <form class="inline" th:action="@{|/admin/delete/tag/${tag.id}|}" method="post">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+        <input type="submit" onclick="return confirm('Are you sure?');" class="btn btn-danger btn-sm" value="Delete">
+      </form>
+    </td>
+  </tr>
+</table>
+<div class="page-footer">
+  <div th:replace="~{macros :: pagination(${pagination}, '/admin/manage/tag')}"></div>
+</div>
+</th:block>
+<th:block th:if="${#lists.isEmpty(tags)}">
+  <div class="tip">
+    <h5>No tags.</h5>
+  </div>
+</th:block>
+</section>
+
+</body>
+</html>

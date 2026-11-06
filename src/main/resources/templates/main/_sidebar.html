@@ -1,0 +1,35 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="sidebar">
+<div class="card bg-light mb-3">
+  <div class="card-body">
+    <div class="row row-cols-auto mb-3">
+      <div class="col">
+        <a th:href="@{|/user/${currentUser.username}|}">
+          <img class="rounded avatar-s" th:src="@{|/avatars/${currentUser.avatarM}|}">
+        </a>
+      </div>
+      <div class="col">
+        <h6 class="card-title">
+          <a class="text-decoration-none" th:href="@{|/user/${currentUser.username}|}"
+             th:text="${currentUser.name}">name</a>
+        </h6>
+        <p class="card-subtitle text-muted" th:text="${currentUser.username}">username</p>
+      </div>
+    </div>
+    <a class="card-link text-decoration-none text-dark" th:href="@{|/user/${currentUser.username}|}">
+      <i class="bi bi-house-fill"></i> My Photos
+    </a><br>
+    <a class="card-link text-decoration-none text-dark" th:href="@{|/user/${currentUser.username}/collections|}">
+      <i class="bi bi-suit-heart-fill"></i> My Collections
+    </a>
+  </div>
+</div>
+<div class="card bg-light mb-3">
+  <div class="card-header">Hot Tags</div>
+  <div class="list-group list-group-flush">
+    <a class="list-group-item" th:each="tag : ${tags}" th:href="@{|/tag/${tag.id}|}">
+      <th:block th:text="${tag.name}">tag</th:block>
+      <span class="badge text-bg-light rounded-pill" th:text="${v.tagPhotos(tag)}">0</span>
+    </a>
+  </div>
+</div>
+</div>

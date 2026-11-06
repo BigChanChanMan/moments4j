@@ -1,0 +1,55 @@
+# Port of moments/settings.py BaseConfig/DevelopmentConfig
+spring:
+  application:
+    name: moments4j
+  datasource:
+    # sqlite file next to the project root, mirrors data-dev.db
+    url: jdbc:sqlite:${user.dir}/data-dev.db
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+        globally_quoted_identifiers: true
+    # true = view rendering can lazy-load (matches Flask-SQLAlchemy session behavior)
+    open-in-view: true
+    # show_sql off by default; enable in application-dev if wanted
+  servlet:
+    multipart:
+      max-file-size: 3MB
+      max-request-size: 10MB
+  mail:
+    host: ${MAIL_SERVER:}
+    port: 465
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          auth: true
+  thymeleaf:
+    cache: false
+  output:
+    ansi:
+      enabled: always
+
+server:
+  error:
+    whitelabel:
+      enabled: false
+    path: /error
+
+moments:
+  admin-email: ${MOMENTS_ADMIN:admin@helloflask.com}
+  logging-path: logs/moments.log
+  upload-path: ${MOMENTS_UPLOAD_PATH:uploads}
+
+logging:
+  level:
+    root: INFO
+  file:
+    name: logs/moments.log

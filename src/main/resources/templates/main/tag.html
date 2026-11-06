@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title th:text="${tag.name}">Tag</title>
+</head>
+<body>
+
+<section id="content">
+<div class="page-header">
+  <h1>#<th:block th:text="${tag.name}">tag</th:block>
+    <small class="text-muted fs-6"><th:block th:text="${v.tagPhotos(tag)}">0</th:block> photos</small>
+    <th:block th:if="${v.can(currentUser, 'MODERATE')}">
+      <a class="btn btn-danger btn-sm" th:href="@{|/admin/delete/tag/${tag.id}|}"
+        onclick="return confirm('Are you sure?')">
+        Delete
+      </a>
+    </th:block>
+    <span class="dropdown">
+      <button class="btn btn-secondary btn-sm" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false">
+        Order by <th:block th:text="${orderRule}">time</th:block> <i class="bi bi-chevron-expand"></i>
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <th:block th:if="${orderRule == 'collections'}">
+          <a class="dropdown-item" th:href="@{|/tag/${tag.id}|(order_rule='time')}">
+            Order by time
+          </a>
+        </th:block>
+        <th:block th:if="${orderRule != 'collections'}">
+          <a class="dropdown-item" th:href="@{|/tag/${tag.id}|(order_rule='collections')}">
+            Order by collections
+          </a>
+        </th:block>
+      </div>
+    </span>
+  </h1>
+</div>
+<div class="row">
+  <th:block th:each="photo : ${photos}">
+    <div th:replace="~{macros :: photo_card(${photo})}"></div>
+  </th:block>
+</div>
+<div class="page-footer">
+  <div th:replace="~{macros :: pagination(${pagination}, '/tag/' + ${tag.id})}"></div>
+</div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="user_header(user)">
+
+<div class="row row-cols-auto">
+  <div class="col">
+    <a th:href="${currentUser != null and currentUser.id == user.id} ? @{|/user/settings/avatar|} : @{#}" title="Change avatar">
+      <img class="rounded avatar-l" th:src="@{|/avatars/${user.avatarL}|}">
+    </a>
+  </div>
+  <div class="col">
+    <h1><th:block th:text="${user.name}">name</th:block>
+      <small class="text-muted" th:text="${user.username}">username</small>
+    </h1>
+    <p th:if="${user.bio}" th:text="${user.bio}">bio</p>
+    <p>
+      <th:block th:if="${user.website}">
+        <i class="bi bi-link-45deg"></i>
+        <a class="text-decoration-none text-dark" th:href="${user.website}" target="_blank"
+           th:text="${#strings.abbreviate(user.website, 30)}">website</a>&nbsp;&nbsp;
+      </th:block>
+      <th:block th:if="${user.location}">
+        <i class="bi bi-pin-map"></i>
+        <a class="text-decoration-none text-dark" th:href="@{'https://www.google.com/maps?q=' + ${user.location}}" target="_blank"
+           th:text="${#strings.abbreviate(user.location, 30)}">location</a>&nbsp;&nbsp;
+      </th:block>
+      <i class="bi bi-calendar"></i>
+      Joined <span class="dayjs" data-format="LL" th:text="${user.memberSince}">date</span>
+    </p>
+    <div>
+      <th:block th:if="${currentUser != null and currentUser.id != user.id}">
+        <th:block th:if="${v.can(currentUser, 'MODERATE')}">
+          <th:block th:if="${user.locked}">
+            <form class="inline" th:action="@{|/admin/unlock/user/${user.id}|}" method="post">
+              <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+              <input type="submit" class="btn btn-secondary btn-sm" value="Unlock">
+            </form>
+          </th:block>
+          <th:block th:if="${!user.locked}">
+            <form class="inline" th:action="@{|/admin/lock/user/${user.id}|}" method="post">
+              <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+              <input type="submit" class="btn btn-warning btn-sm" value="Lock">
+            </form>
+          </th:block>
+          <th:block th:if="${user.active}">
+            <form class="inline" th:action="@{|/admin/block/user/${user.id}|}" method="post">
+              <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+              <input type="submit" class="btn btn-warning btn-sm" value="Block">
+            </form>
+          </th:block>
+          <th:block th:if="${!user.active}">
+            <form class="inline" th:action="@{|/admin/unblock/user/${user.id}|}" method="post">
+              <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+              <input type="submit" class="btn btn-secondary btn-sm" value="Unblock">
+            </form>
+          </th:block>
+          <a class="btn btn-light btn-sm" th:href="|mailto:${user.email}|">Email</a>
+        </th:block>
+        <th:block th:if="${v.isAdmin(currentUser)}">
+          <a class="btn btn-warning btn-sm" th:href="@{|/admin/profile/${user.id}|}">Edit
+            profile</a>
+        </th:block>
+      </th:block>
+      <div th:replace="~{macros :: follow_area(${user})}"></div>
+      <th:block th:if="${currentUser != null and currentUser.id == user.id}">
+        <a class="btn btn-outline-primary btn-sm" href="/user/settings/profile">Edit profile</a>
+      </th:block>
+    </div>
+  </div>
+</div>
+<div class="user-nav">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link" th:classappend="${#strings.startsWith(requestPath, '/user/' + user.username) and !#strings.contains(requestPath, '/collections') and !#strings.contains(requestPath, '/followers') and !#strings.contains(requestPath, '/following')} ? 'active'"
+         th:href="@{|/user/${user.username}|}">Photo
+        <span class="badge text-bg-light rounded-pill" th:text="${v.photos(user)}">0</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" th:classappend="${#strings.contains(requestPath, '/collections')} ? 'active'"
+         th:href="@{|/user/${user.username}/collections|}">Collections
+        <span class="badge text-bg-light rounded-pill" th:text="${v.collections(user)}">0</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" th:classappend="${#strings.contains(requestPath, '/following')} ? 'active'"
+         th:href="@{|/user/${user.username}/following|}">Following
+        <span class="badge text-bg-light rounded-pill" th:text="${v.followingCount(user)}">0</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" th:classappend="${#strings.contains(requestPath, '/followers')} ? 'active'"
+         th:href="@{|/user/${user.username}/followers|}">Followers
+        <span class="badge text-bg-light rounded-pill" th:text="${v.followers(user)}">0</span>
+      </a>
+    </li>
+  </ul>
+</div>
+</div>

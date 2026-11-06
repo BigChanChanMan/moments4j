@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Port of templates/admin/index.html: dashboard layout for all admin pages.
+     Pages do: <html th:replace="~{admin/index :: admin_layout(title=~{::title}, content=~{::#content})}"> -->
+
+<head th:fragment="admin_head(title)">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title th:replace="${title}">Dashboard</title>
+  <link rel="shortcut icon" th:href="@{/static/favicon.ico}">
+  <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" th:href="@{/static/css/style.css}">
+</head>
+
+<nav th:fragment="admin_nav" class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="/admin/">
+      <img th:src="@{/static/favicon.ico}" alt="Moments"> Moments Dashboard
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01"
+      aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarColor01">
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" th:classappend="${requestPath == '/admin/' ? 'active' : ''}" href="/">Return Moments</a>
+        <div class="dropdown nav-item">
+          <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button"
+            aria-expanded="false">Manage<span class="caret"></span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" role="menu">
+            <a class="dropdown-item" href="/admin/manage/photo">Photos</a>
+            <a class="dropdown-item" href="/admin/manage/user">Users</a>
+            <a class="dropdown-item" href="/admin/manage/tag">Tags</a>
+            <a class="dropdown-item" href="/admin/manage/comment">Comments</a>
+          </div>
+        </div>
+        <div class="dropdown nav-item">
+          <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+            <img class="avatar-xs" th:src="@{|/avatars/${currentUser.avatarS}|}">
+            <span class="caret"></span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end" role="menu">
+            <h6 class="dropdown-header">Logged in as <th:block th:text="${currentUser.username}">user</th:block></h6>
+            <a class="dropdown-item" th:href="@{|/user/${currentUser.username}|}">
+              <i class="bi bi-person-fill"></i> My Home
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/user/settings/profile">
+              <i class="bi bi-gear-fill"></i> Settings
+            </a>
+            <a class="dropdown-item" href="/auth/logout">
+              <i class="bi bi-power"></i> Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<li th:fragment="crumb(path, text)" class="breadcrumb-item"
+    th:classappend="${requestPath == path} ? 'active'"
+    th:attrappend="aria-current=${requestPath == path} ? 'page'">
+  <th:block th:if="${requestPath != path}"><a th:href="${path}" th:text="${text}">crumb</a></th:block>
+  <th:block th:if="${requestPath == path}" th:text="${text}">crumb</th:block>
+</li>
+
+<html lang="en" th:fragment="admin_layout(title, content)">
+
+<head th:replace="~{admin/index :: admin_head(${title})}"></head>
+
+<body lang="en">
+
+  <nav th:replace="~{admin/index :: admin_nav}"></nav>
+
+  <main>
+    <div class="container">
+      <th:block th:if="${flashes != null}">
+        <div th:each="f : ${flashes}"
+             th:class="|alert alert-${f[0]} alert-dismissible fade show|">
+          <div th:utext="${f[1]}">message</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      </th:block>
+      <th:block th:insert="${content}"></th:block>
+      <footer>
+        <p class="float-start">
+          <small>&copy; 2025 Moments -
+            <a href="https://greyli.com" title="Written by Grey Li">Grey Li</a> -
+            <a href="https://github.com/greyli/moments" title="Fork me on GitHub">GitHub</a> -
+            <a href="https://helloflask.com" title="A HelloFlask project">HelloFlask</a>
+          </small>
+        </p>
+        <p class="float-end">
+          <small>Capture and share every wonderful moment.</small>
+        </p>
+      </footer>
+    </div>
+  </main>
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="mainToast" class="toast align-items-center border-0 text-bg-secondary" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body text-white"></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script th:src="@{/static/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{/static/js/dayjs/dayjs.min.js}"></script>
+  <script th:src="@{/static/js/dayjs/plugin/relativeTime.js}"></script>
+  <script th:src="@{/static/js/dayjs/plugin/utc.js}"></script>
+  <script th:src="@{/static/js/dayjs/plugin/localizedFormat.js}"></script>
+  <script th:src="@{/static/js/main.js}"></script>
+  <script type="text/javascript">
+    const csrfToken = "[[${_csrf != null ? _csrf.token : ''}]]";
+    const isAuthenticated = [[${currentUser != null}]];
+  </script>
+</body>
+
+</html>
+
+<!-- dashboard content, rendered by admin/home.html -->
+<section th:fragment="dashboard_content" id="content">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li th:replace="~{admin/index :: crumb('/admin/', 'Dashboard Home')}"></li>
+  </ol>
+</nav>
+<div class="row">
+  <div class="col-md-6">
+    <div class="card border-primary mb-3">
+      <div class="card-header"><i class="bi bi-image"></i> Photos</div>
+      <div class="card-body">
+        <h4 class="card-title">Total: <th:block th:text="${photoCount}">0</th:block></h4>
+        <p class="card-text">Reported: <th:block th:text="${reportedPhotosCount}">0</th:block></p>
+        <a class="btn btn-primary text-white" href="/admin/manage/photo">Manage</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-secondary mb-3">
+      <div class="card-header"><i class="bi bi-people-fill"></i> Users</div>
+      <div class="card-body">
+        <h4 class="card-title">Total: <th:block th:text="${userCount}">0</th:block></h4>
+        <p class="card-text">Locked: <th:block th:text="${lockedUserCount}">0</th:block>
+          Blocked: <th:block th:text="${blockedUserCount}">0</th:block></p>
+        <a class="btn btn-primary text-white" href="/admin/manage/user">Manage</a>
+        <a class="btn btn-secondary text-white" href="/admin/manage/user?filter=locked">View
+          Locked</a>
+        <a class="btn btn-secondary text-white" href="/admin/manage/user?filter=blocked">View
+          Blocked</a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    <div class="card border-danger mb-3">
+      <div class="card-header"><i class="bi bi-chat-left-fill"></i> Comments</div>
+      <div class="card-body">
+        <h4 class="card-title">Total: <th:block th:text="${commentCount}">0</th:block></h4>
+        <p class="card-text">Reported: <th:block th:text="${reportedCommentsCount}">0</th:block></p>
+        <a class="btn btn-primary text-white" href="/admin/manage/comment">Manage</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-success mb-3">
+      <div class="card-header"><i class="bi bi-tag-fill"></i> Tags</div>
+      <div class="card-body">
+        <h4 class="card-title">Total: <th:block th:text="${tagCount}">0</th:block></h4>
+        <p class="card-text">&nbsp;</p>
+        <a class="btn btn-primary text-white" href="/admin/manage/tag">Manage</a>
+      </div>
+    </div>
+  </div>
+</div>
+</section>

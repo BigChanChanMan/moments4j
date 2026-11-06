@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<p>Hello <th:block th:text="${user.username}">user</th:block>,</p>
+<p>Please visit the link below to verify your new email address:<br>
+  <a th:href="${changeEmailUrl}" th:text="${changeEmailUrl}">link</a>
+</p>
+<small>(Please do not reply to this notification, this inbox is not monitored.)</small>
+</html>

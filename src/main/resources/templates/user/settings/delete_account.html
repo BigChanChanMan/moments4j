@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Delete Account</title>
+</head>
+<body>
+
+<section id="content">
+<div class="page-header">
+  <h1>Settings</h1>
+</div>
+<div class="row">
+<div th:replace="~{user/settings/base :: settings_nav}"></div>
+<div class="col-md-9">
+
+  <div class="card w-100 bg-light border-danger">
+    <h3 class="card-header">Delete Account</h3>
+    <div class="card-body">
+      <form method="post" th:action="@{/user/settings/account/delete}" th:object="${form}">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+        <div class="mb-3" th:with="err=${#fields.hasErrors('username')}">
+          <label class="form-label" th:classappend="${err} ? 'text-danger'" for="username">Username</label>
+          <input type="text" class="form-control" th:classappend="${err} ? 'is-invalid'" id="username" th:field="*{username}">
+          <div class="invalid-feedback" th:if="${err}" th:errors="*{username}">error</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+</body>
+</html>

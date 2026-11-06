@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Explore</title>
+</head>
+<body>
+
+<section id="content">
+<div class="row">
+  <div class="col-md-12">
+    <th:block th:each="photo : ${photos}">
+      <div th:replace="~{macros :: photo_card(${photo})}"></div>
+    </th:block>
+  </div>
+</div>
+<div class="text-center">
+  <a class="btn btn-primary" href="/explore">
+    <i class="bi bi-shuffle"></i> Change
+  </a>
+</div>
+</section>
+
+</body>
+</html>

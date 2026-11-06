@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Home</title>
+</head>
+<body>
+
+<section id="content" th:if="${currentUser != null}">
+  <div class="row justify-content-md-center">
+    <div class="col-lg-8">
+      <th:block th:if="${photos != null and !#lists.isEmpty(photos)}">
+        <div class="card mb-3 bg-light" th:each="photo : ${photos}">
+          <div class="card-header">
+            <a class="dead-link" th:href="@{|/user/${photo.author.username}|}">
+              <img class="rounded img-fluid avatar-s profile-popover"
+                th:data-href="@{|/ajax/profile/${photo.author.id}|}"
+                th:src="@{|/avatars/${photo.author.avatarM}|}">
+            </a>
+            <a class="profile-popover trend-card-avatar text-decoration-none"
+              th:data-href="@{|/ajax/profile/${photo.author.id}|}"
+              th:href="@{|/user/${photo.author.username}|}" th:text="${photo.author.name}">name</a>
+            <span class="float-end">
+              <small class="dayjs-tooltip" data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-delay="500" th:data-timestamp="${photo.createdAt}">
+                <span class="dayjs-from-now" data-format="LL" th:text="${photo.createdAt}">date</span>
+              </small>
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="text-center">
+              <a class="thumbnail" th:href="@{|/photo/${photo.id}|}" target="_blank">
+                <img class="img-fluid" th:src="@{|/images/${photo.filenameM}|}">
+              </a>
+            </div>
+          </div>
+          <div class="card-footer">
+            <i class="bi bi-suit-heart-fill"></i>
+            <span th:id="|collectors-count-${photo.id}|"
+              th:data-href="@{|/ajax/collectors-count/${photo.id}|}">
+              <th:block th:text="${v.collectors(photo)}">0</th:block>
+            </span>
+            <i class="bi bi-chat-left-fill"></i> <th:block th:text="${v.comments(photo)}">0</th:block>
+            <div class="float-end">
+              <th:block th:if="${currentUser != null}">
+                <button th:classappend="${!v.collecting(currentUser, photo)} ? 'hide'"
+                  class="btn btn-danger btn-sm uncollect-btn"
+                  th:data-href="@{|/ajax/uncollect/${photo.id}|}" th:data-id="${photo.id}" title="Uncollect">
+                  <i class="bi bi-suit-heart-fill"></i>
+                </button>
+                <button th:classappend="${v.collecting(currentUser, photo)} ? 'hide'"
+                  class="btn btn-light btn-sm collect-btn"
+                  th:data-href="@{|/ajax/collect/${photo.id}|}" th:data-id="${photo.id}" title="Collect">
+                  <i class="bi bi-suit-heart" style="color: red;"></i>
+                </button>
+              </th:block>
+              <th:block th:if="${currentUser == null}">
+                <form class="inline" method="post" th:action="@{|/collect/${photo.id}|}">
+                  <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+                  <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="bi bi-suit-heart"></i>
+                  </button>
+                </form>
+              </th:block>
+            </div>
+            <p class="card-text" th:if="${photo.description}" th:text="${photo.description}">description</p>
+          </div>
+        </div>
+      </th:block>
+      <th:block th:if="${photos == null or #lists.isEmpty(photos)}">
+        <div class="tip text-center">
+          <h3>No trends.</h3>
+          <p><a href="/explore">Explore</a></p>
+        </div>
+      </th:block>
+    </div>
+    <div class="col-lg-3">
+      <div th:replace="~{main/_sidebar :: sidebar}"></div>
+    </div>
+  </div>
+  <th:block th:if="${photos != null and !#lists.isEmpty(photos)}">
+    <div th:replace="~{macros :: pagination(${pagination}, '/')}"></div>
+  </th:block>
+</section>
+
+<section id="content" th:if="${currentUser == null}">
+  <div class="jumbotron">
+    <div class="row">
+      <div class="col-md-8">
+        <img th:src="@{/static/images/index.jpg}" class="rounded img-fluid">
+      </div>
+      <div class="col-md-4 align-self-center">
+        <h1>Moments</h1>
+        <p>Capture and share every wonderful moment.</p>
+        <p><a class="btn btn-primary btn-lg" href="/auth/register">Join Now</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

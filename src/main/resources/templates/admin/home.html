@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/index :: admin_layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Dashboard</title>
+</head>
+<body>
+
+<section id="content">
+  <div th:replace="~{admin/index :: dashboard_content}"></div>
+</section>
+
+</body>
+</html>

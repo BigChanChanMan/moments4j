@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title th:text="|${user.name}'s followers|">Followers</title>
+</head>
+<body>
+
+<section id="content">
+<div th:replace="~{user/_header :: user_header(${user})}"></div>
+<div class="row">
+  <div class="col-md-12">
+    <th:block th:if="${#lists.size(follows) != 1}">
+      <th:block th:each="follow : ${follows}">
+        <th:block th:if="${follow.follower.id != user.id}">
+          <div th:replace="~{macros :: user_card(${follow.follower})}"></div>
+        </th:block>
+      </th:block>
+    </th:block>
+    <th:block th:if="${#lists.size(follows) == 1}">
+      <div class="tip">
+        <h3>No followers.</h3>
+      </div>
+    </th:block>
+  </div>
+</div>
+<th:block th:if="${#lists.size(follows) != 1}">
+  <div class="page-footer">
+    <div th:replace="~{macros :: pagination(${pagination}, '/user/' + ${user.username} + '/followers')}"></div>
+  </div>
+</th:block>
+</section>
+
+</body>
+</html>

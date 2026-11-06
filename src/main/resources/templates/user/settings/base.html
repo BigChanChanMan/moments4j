@@ -1,0 +1,19 @@
+<!-- Port of templates/user/settings/base.html: left nav column -->
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="settings_nav" class="col-md-3">
+  <div class="nav nav-pills flex-column" role="tablist" aria-orientation="vertical">
+    <a class="nav-link" th:classappend="${#strings.startsWith(requestPath, '/user/settings/profile')} ? 'active'"
+       href="/user/settings/profile">Edit Profile</a>
+    <a class="nav-link" th:classappend="${#strings.startsWith(requestPath, '/user/settings/avatar')} ? 'active'"
+       href="/user/settings/avatar">Change Avatar</a>
+    <a class="nav-link" th:classappend="${#strings.startsWith(requestPath, '/user/settings/change-password')} ? 'active'"
+       href="/user/settings/change-password">Change Password</a>
+    <a class="nav-link" th:classappend="${#strings.startsWith(requestPath, '/user/settings/change-email')} ? 'active'"
+       href="/user/settings/change-email">Change Email</a>
+    <a class="nav-link" th:classappend="${#strings.startsWith(requestPath, '/user/settings/notification')} ? 'active'"
+       href="/user/settings/notification">Notification</a>
+    <a class="nav-link" th:classappend="${#strings.startsWith(requestPath, '/user/settings/privacy')} ? 'active'"
+       href="/user/settings/privacy">Privacy</a>
+    <a class="nav-link" th:classappend="${#strings.startsWith(requestPath, '/user/settings/account/delete')} ? 'active'"
+       href="/user/settings/account/delete">Delete Account</a>
+  </div>
+</div>

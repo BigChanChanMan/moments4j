@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Upload</title>
+</head>
+<body>
+
+<section id="content">
+<link rel="stylesheet" th:href="@{/static/css/dropzone.min.css}" type="text/css">
+<div class="page-header">
+  <h1>Upload</h1>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <!-- dropzone.create(action='main.upload') equivalent -->
+    <form id="moments-dropzone" action="/upload" method="post" class="dropzone"
+          style="margin: 20px 0; border: 2px dashed #0087F7; min-height: 400px;">
+      <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+    </form>
+    <a class="btn btn-light float-end" th:href="@{|/user/${currentUser.username}|}">
+      Done
+    </a>
+  </div>
+</div>
+</section>
+
+<th:block id="page-scripts">
+  <script th:src="@{/static/js/dropzone.min.js}"></script>
+  <script>
+    // dropzone.config() equivalent, from BaseConfig's DROPZONE_* settings
+    Dropzone.options.momentsDropzone = {
+      url: '/upload',
+      method: 'post',
+      paramName: 'file',
+      maxFilesize: 3,               // MB
+      maxFiles: 30,
+      acceptedFiles: '.png,.jpg,.jpeg',
+      parallelUploads: 1,
+      headers: { 'X-CSRFToken': csrfToken },
+      init: function () {
+        this.on('complete', function (file) {
+          if (this.getAcceptedFiles().length === this.options.maxFiles) {
+            this.options.maxFilesReached && this.options.maxFilesReached();
+          }
+        });
+      }
+    };
+  </script>
+</th:block>
+
+</body>
+</html>

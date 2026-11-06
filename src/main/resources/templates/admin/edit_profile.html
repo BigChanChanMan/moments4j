@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/index :: admin_layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Edit profile</title>
+</head>
+<body>
+
+<section id="content">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li th:replace="~{admin/index :: crumb('/admin/', 'Dashboard Home')}"></li>
+    <li th:replace="~{admin/index :: crumb('/admin/manage/user', 'Manage User')}"></li>
+    <li class="breadcrumb-item active" aria-current="page">Edit Profile</li>
+  </ol>
+</nav>
+<div class="page-header">
+  <h1>Edit profile
+    <a class="float-end btn btn-light" th:href="@{|/user/${user.username}|}">Return
+      <th:block th:text="${user.username}">user</th:block>'s homepage</a>
+  </h1>
+</div>
+<div class="card w-100 bg-light">
+  <h3 class="card-header">Edit Profile</h3>
+  <div class="card-body">
+    <form method="post" th:action="@{|/admin/profile/${user.id}|}" th:object="${form}">
+      <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+      <div class="mb-3" th:with="err=${#fields.hasErrors('name')}">
+        <label class="form-label" th:classappend="${err} ? 'text-danger'" for="name">Name</label>
+        <input type="text" class="form-control" th:classappend="${err} ? 'is-invalid'" id="name" th:field="*{name}">
+        <div class="invalid-feedback" th:if="${err}" th:errors="*{name}">error</div>
+      </div>
+      <div class="mb-3" th:with="err=${#fields.hasErrors('email')}">
+        <label class="form-label" th:classappend="${err} ? 'text-danger'" for="email">Email</label>
+        <input type="email" class="form-control" th:classappend="${err} ? 'is-invalid'" id="email" th:field="*{email}">
+        <div class="invalid-feedback" th:if="${err}" th:errors="*{email}">error</div>
+      </div>
+      <div class="mb-3" th:with="err=${#fields.hasErrors('role')}">
+        <label class="form-label" th:classappend="${err} ? 'text-danger'" for="role">Role</label>
+        <select class="form-select" id="role" th:field="*{role}">
+          <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.name}">role</option>
+        </select>
+        <div class="invalid-feedback" th:if="${err}" th:errors="*{role}">error</div>
+      </div>
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="active" th:field="*{active}">
+        <label class="form-check-label" for="active">Active</label>
+      </div>
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="confirmed" th:field="*{confirmed}">
+        <label class="form-check-label" for="confirmed">Confirmed</label>
+      </div>
+      <div class="mb-3" th:with="err=${#fields.hasErrors('username')}">
+        <label class="form-label" th:classappend="${err} ? 'text-danger'" for="username">Username</label>
+        <input type="text" class="form-control" th:classappend="${err} ? 'is-invalid'" id="username" th:field="*{username}">
+        <div class="invalid-feedback" th:if="${err}" th:errors="*{username}">error</div>
+      </div>
+      <div class="mb-3" th:with="err=${#fields.hasErrors('bio')}">
+        <label class="form-label" th:classappend="${err} ? 'text-danger'" for="bio">Bio</label>
+        <textarea class="form-control" th:classappend="${err} ? 'is-invalid'" id="bio" rows="4" th:field="*{bio}"></textarea>
+        <div class="invalid-feedback" th:if="${err}" th:errors="*{bio}">error</div>
+      </div>
+      <div class="mb-3" th:with="err=${#fields.hasErrors('website')}">
+        <label class="form-label" th:classappend="${err} ? 'text-danger'" for="website">Website</label>
+        <input type="text" class="form-control" th:classappend="${err} ? 'is-invalid'" id="website" th:field="*{website}">
+        <div class="invalid-feedback" th:if="${err}" th:errors="*{website}">error</div>
+      </div>
+      <div class="mb-3" th:with="err=${#fields.hasErrors('location')}">
+        <label class="form-label" th:classappend="${err} ? 'text-danger'" for="location">City</label>
+        <input type="text" class="form-control" th:classappend="${err} ? 'is-invalid'" id="location" th:field="*{location}">
+        <div class="invalid-feedback" th:if="${err}" th:errors="*{location}">error</div>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title th:text="|${user.name}'s collection|">Collections</title>
+</head>
+<body>
+
+<section id="content">
+<div th:replace="~{user/_header :: user_header(${user})}"></div>
+<div class="row">
+  <div class="col-md-12">
+    <th:block th:if="${user.publicCollections or (currentUser != null and currentUser.id == user.id)}">
+      <th:block th:if="${!#lists.isEmpty(collections)}">
+        <th:block th:each="collection : ${collections}">
+          <div th:replace="~{macros :: photo_card(${collection.photo})}"></div>
+        </th:block>
+      </th:block>
+      <th:block th:if="${#lists.isEmpty(collections)}">
+        <div class="tip">
+          <h3>No collection.</h3>
+        </div>
+      </th:block>
+    </th:block>
+    <th:block th:if="${!user.publicCollections and (currentUser == null or currentUser.id != user.id)}">
+      <div class="tip">
+        <h3>This user's collections are private.</h3>
+      </div>
+    </th:block>
+  </div>
+</div>
+<th:block th:if="${!#lists.isEmpty(collections)}">
+  <div class="page-footer">
+    <div th:replace="~{macros :: pagination(${pagination}, '/user/' + ${user.username} + '/collections')}"></div>
+  </div>
+</th:block>
+</section>
+
+</body>
+</html>

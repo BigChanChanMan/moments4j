@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Change Email</title>
+</head>
+<body>
+
+<section id="content">
+<div class="page-header">
+  <h1>Settings</h1>
+</div>
+<div class="row">
+<div th:replace="~{user/settings/base :: settings_nav}"></div>
+<div class="col-md-9">
+
+  <div class="card w-100 bg-light">
+    <h3 class="card-header">Change Email</h3>
+    <div class="card-body">
+      <form method="post" th:action="@{/user/settings/change-email}" th:object="${form}">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+        <div class="mb-3" th:with="err=${#fields.hasErrors('email')}">
+          <label class="form-label" th:classappend="${err} ? 'text-danger'" for="email">New Email</label>
+          <input type="email" class="form-control" th:classappend="${err} ? 'is-invalid'" id="email" th:field="*{email}">
+          <div class="invalid-feedback" th:if="${err}" th:errors="*{email}">error</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+</body>
+</html>

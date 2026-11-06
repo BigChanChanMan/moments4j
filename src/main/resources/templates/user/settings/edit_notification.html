@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Notification Settings</title>
+</head>
+<body>
+
+<section id="content">
+<div class="page-header">
+  <h1>Settings</h1>
+</div>
+<div class="row">
+<div th:replace="~{user/settings/base :: settings_nav}"></div>
+<div class="col-md-9">
+
+  <div class="card w-100 bg-light">
+    <h3 class="card-header">Notification Settings</h3>
+    <div class="card-body">
+      <form method="post" th:action="@{/user/settings/notification}" th:object="${form}">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="receiveCommentNotification" th:field="*{receiveCommentNotification}">
+          <label class="form-check-label" for="receiveCommentNotification">New comment</label>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="receiveFollowNotification" th:field="*{receiveFollowNotification}">
+          <label class="form-check-label" for="receiveFollowNotification">New follower</label>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="receiveCollectNotification" th:field="*{receiveCollectNotification}">
+          <label class="form-check-label" for="receiveCollectNotification">New collector</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+</body>
+</html>

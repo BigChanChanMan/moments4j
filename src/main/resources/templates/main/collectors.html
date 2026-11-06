@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(title=~{::title}, content=~{::#content})}">
+<head>
+  <title>Collectors</title>
+</head>
+<body>
+
+<section id="content">
+<div class="page-header">
+  <div class="row">
+    <div class="col-md-12">
+      <a class="btn btn-light btn-sm" th:href="@{|/photo/${photo.id}|}">
+        <i class="bi bi-arrow-left"></i> Return
+      </a>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <h3><th:block th:text="${#lists.size(collections)}">0</th:block> Collectors</h3>
+    <th:block th:each="collection : ${collections}">
+      <div th:replace="~{macros :: user_card(${collection.user})}"></div>
+    </th:block>  </div>
+</div>
+<th:block th:if="${!#lists.isEmpty(collections)}">
+  <div class="page-footer">
+    <div th:replace="~{macros :: pagination(${pagination}, '/photo/' + ${photo.id} + '/collectors')}"></div>
+  </div>
+</th:block>
+</section>
+
+</body>
+</html>
