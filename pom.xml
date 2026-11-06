@@ -67,6 +67,12 @@
       <artifactId>h2</artifactId>
       <scope>runtime</scope>
     </dependency>
+    <!-- PostgreSQL for production (application-prod.yml) -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
 
     <!-- JWT tokens (PyJWT equivalent) -->
     <dependency>

@@ -3,7 +3,8 @@ spring:
   application:
     name: moments4j
   datasource:
-    # sqlite file next to the project root, mirrors data-dev.db
+    # sqlite file in the service's own data dir (docker volume /app/data),
+    # mirrors data-dev.db; relative to the working directory outside docker
     url: jdbc:sqlite:${user.dir}/data-dev.db
     driver-class-name: org.sqlite.JDBC
   jpa:

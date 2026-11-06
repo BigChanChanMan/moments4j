@@ -1,0 +1,51 @@
+# Production profile — port of settings.py ProductionConfig.
+#
+# Activation: SPRING_PROFILES_ACTIVE=prod
+#
+# Database: the company-shared postgres is reached purely over the network —
+# nothing is installed locally. Configure with standard Spring properties:
+#
+#   SPRING_DATASOURCE_URL=jdbc:postgresql://db.corp.example:5432/moments4j
+#   SPRING_DATASOURCE_USERNAME=svc_moments
+#   SPRING_DATASOURCE_PASSWORD=...
+#
+# (Spring Boot relaxed binding also accepts spring.datasource.url etc.)
+spring:
+  datasource:
+    # defaults below are placeholders; always set the three env vars above in production
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/moments4j}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        globally_quoted_identifiers: false
+  mail:
+    # same env vars as the original (MAIL_SERVER/MAIL_USERNAME/MAIL_PASSWORD)
+    host: ${MAIL_SERVER:}
+    port: ${MAIL_PORT:465}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          auth: true
+  thymeleaf:
+    cache: true
+
+moments:
+  admin-email: ${MOMENTS_ADMIN:admin@helloflask.com}
+  upload-path: ${MOMENTS_UPLOAD_PATH:/app/uploads}
+  logging-path: ${MOMENTS_LOGGING_PATH:/app/logs/moments.log}
+
+logging:
+  file:
+    name: ${MOMENTS_LOGGING_PATH:/app/logs/moments.log}
